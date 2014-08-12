@@ -17,7 +17,7 @@ func TestCSSRuleSetGetType(t *testing.T) {
 
 func TestAddRuleList(t *testing.T) {
 	styleSheet := new(CSSStyleSheet)
-	styleSheet.ruleList = make(CSSRuleList, 0)
+	styleSheet.CssRuleList.RuleList = make([]*CSSRule, 0)
 
 	rule1 := NewCSSRule(STYLE_RULE)
 	rule2 := NewCSSRule(STYLE_RULE)
@@ -25,7 +25,7 @@ func TestAddRuleList(t *testing.T) {
 	styleSheet.AddRuleList(rule1)
 	styleSheet.AddRuleList(rule2)
 
-	actual := len(styleSheet.ruleList)
+	actual := len(styleSheet.CssRuleList.RuleList)
 
 	if 2 != actual {
 		t.Errorf("len(styleSheet.ruleList) = %d , want 2.", actual)
@@ -35,20 +35,20 @@ func TestAddRuleList(t *testing.T) {
 
 func TestAddStyleDeclaration(t *testing.T) {
 	rule := NewCSSRule(STYLE_RULE)
-	styleRule := rule.style
+	styleRule := rule.Style
 
-	styleRule.styles = make([]*CSSStyleDeclaration, 0)
+	styleRule.Styles = make([]*CSSStyleDeclaration, 0)
 
 	styleRule.AddStyleDeclaration("test", "test")
 	styleRule.AddStyleDeclaration("test2", "test2")
 
-	actual := len(styleRule.styles)
+	actual := len(styleRule.Styles)
 
 	if 2 != actual {
 		t.Errorf("len(rule.styles) = %d , want 2.", actual)
 	}
 
-	style := styleRule.styles[0]
+	style := styleRule.Styles[0]
 	if "test" != style.Property {
 		t.Errorf("style.Property = %s , want test.", style.Property)
 	}

@@ -1,5 +1,9 @@
 package stylesheet
 
+import (
+	"log"
+)
+
 type DOMString string
 
 const (
@@ -12,23 +16,24 @@ type StyleSheet struct {
 }
 
 type CSSStyleSheet struct {
-	Type     DOMString
-	ruleList CSSRuleList
+	Type        DOMString
+	CssRuleList CSSRuleList
 }
 
 type StyleSheetList []StyleSheet
 
-type CSSRuleList []*CSSRule
+type CSSRuleList struct {
+	RuleList []*CSSRule
+}
 
 type CSSRule struct {
 	CssType int
-
-	style CSSStyleRule
+	Style   CSSStyleRule
 }
 
 type CSSStyleRule struct {
-	CssText DOMString
-	styles  []*CSSStyleDeclaration
+	SelectorText DOMString
+	Styles       []*CSSStyleDeclaration
 }
 
 type CSSStyleDeclaration struct {
@@ -41,7 +46,10 @@ func (self *CSSStyleDeclaration) Construct() {
 }
 
 func NewCSSStyleDeclaration(property DOMString, value DOMString) *CSSStyleDeclaration {
-	style := &CSSStyleDeclaration{Property: property, Value: value}
+	style := new(CSSStyleDeclaration)
+	style.Property = property
+	style.Value = value
+
 	style.Construct()
 	return style
 }
@@ -49,6 +57,15 @@ func NewCSSStyleDeclaration(property DOMString, value DOMString) *CSSStyleDeclar
 func NewCSSRule(Type int) *CSSRule {
 	rule := &CSSRule{}
 	rule.SetType(Type)
+	return rule
+}
+
+func NewCSSStyleRule(selectorText DOMString, Property DOMString, Value DOMString) *CSSRule {
+	rule := new(CSSRule)
+	rule.SetType(STYLE_RULE)
+
+	rule.Style.SelectorText = selectorText
+	rule.Style.AddStyleDeclaration(Property, Value)
 	return rule
 }
 
@@ -61,10 +78,14 @@ func (self *CSSRule) SetType(Type int) {
 }
 
 func (self *CSSStyleSheet) AddRuleList(rule *CSSRule) {
-	self.ruleList = append(self.ruleList, rule)
+	self.CssRuleList.RuleList = append(self.CssRuleList.RuleList, rule)
+}
+
+func (self *CSSStyleSheet) GetRuleList() *CSSRuleList {
+	return &self.CssRuleList
 }
 
 func (self *CSSStyleRule) AddStyleDeclaration(property DOMString, value DOMString) {
 	style := NewCSSStyleDeclaration(property, value)
-	self.styles = append(self.styles, style)
+	self.Styles = append(self.Styles, style)
 }
