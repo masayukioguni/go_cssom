@@ -23,6 +23,11 @@ const (
 type ParserConf struct {
 	currentState ParserState
 	cssRuleList  stylesheet.CSSRuleList
+	stylesheet   stylesheet.CSSStyleSheet
+
+	NowSelectorText string
+	NowProperty     string
+	NowValue        string
 }
 
 func (c *ParserConf) SetPaserState(state ParserState) {
@@ -56,37 +61,78 @@ func main() {
 
 func main() {
 	conf := new(ParserConf)
-	conf.cssRuleList = make(stylesheet.CSSRuleList, 0)
+	conf.stylesheet. = make(stylesheet.CSSRuleList, 0)
 
-	s := scanner.New("div .a { font-size: 150%%} ")
+	s := scanner.New("div .a { font-size: 150%}")
 	conf.SetPaserState(PARSE_STATE_NONE)
 
 	for {
 		token := s.Next()
+		//log.Println(token)
+
 		if token.Type == scanner.TokenEOF || token.Type == scanner.TokenError {
 			break
 		}
 		switch token.Type {
 		case scanner.TokenIdent:
-			log.Println(token.Value)
+			//log.Println(token.Value)
+			if conf.GetPaserState() == PARSE_STATE_NONE ||
+				conf.GetPaserState() == PARSE_STATE_START_SELRCTOR ||
+				conf.GetPaserState() == PARSE_STATE_END_DECLARE_BLOCK {
+				conf.SetPaserState(PARSE_STATE_START_SELRCTOR)
+
+				conf.NowSelectorText += token.Value
+
+			}
+
+			if conf.GetPaserState() == PARSE_STATE_START_DECLARE_BLOCK {
+				conf.NowProperty = token.Value
+			}
+
 		case scanner.TokenS:
-			log.Println(token.Value)
+			if conf.GetPaserState() == PARSE_STATE_START_SELRCTOR {
+				if string(' ') == token.Value {
+					//log.Println(token.Value)
+					conf.NowSelectorText += token.Value
+				}
+			}
 
 		case scanner.TokenChar:
-			if string('{') == token.Value {
-				log.Println(token.Value)
+
+			if conf.GetPaserState() == PARSE_STATE_START_SELRCTOR {
+				if string('.') == token.Value {
+					//log.Println(token.Value)
+					conf.NowSelectorText += token.Value
+				}
 			}
 
-			if string('.') == token.Value {
-				log.Println(token.Value)
+			if string('{') == token.Value {
+				//log.Println(token.Value)
+				conf.SetPaserState(PARSE_STATE_START_DECLARE_BLOCK)
+
 			}
+
 			if string('}') == token.Value {
-				log.Println(token.Value)
+				//log.Println(token.Value)
+				conf.SetPaserState(PARSE_STATE_END_DECLARE_BLOCK)
+
+				rule := stylesheet.NewCSSStyleRule(stylesheet.DOMString(conf.NowSelectorText),
+					stylesheet.DOMString(conf.NowProperty),
+					stylesheet.DOMString(conf.NowValue))
+				log.Println(*rule)
+				conf.stylesheet.AddRuleList(rule)
+				log.Println(conf.stylesheet)
+
 			}
 		case scanner.TokenPercentage:
-			log.Println(token.Value)
-
+			if conf.GetPaserState() == PARSE_STATE_START_DECLARE_BLOCK {
+				conf.NowValue = token.Value
+			}
 		}
+		rulelist := conf.stylesheet.GetRuleList()
+
+		log.Println(rulelist[0].CssType)
 
 	}
+
 }
