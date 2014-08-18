@@ -1,9 +1,10 @@
 package stylesheet
 
+/*
 import (
 	"log"
 )
-
+*/
 type DOMString string
 
 const (

@@ -61,7 +61,7 @@ func main() {
 
 func main() {
 	conf := new(ParserConf)
-	conf.stylesheet. = make(stylesheet.CSSRuleList, 0)
+	conf.stylesheet = make(stylesheet.CSSStyleSheet, 0)
 
 	s := scanner.New("div .a { font-size: 150%}")
 	conf.SetPaserState(PARSE_STATE_NONE)
